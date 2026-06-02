@@ -1,0 +1,29 @@
+# Secrets (never commit real keys)
+.env
+backend/.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Local databases
+*.db
+careflow.db
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
