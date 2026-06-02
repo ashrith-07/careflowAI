@@ -51,19 +51,19 @@ def _ensure_priority_actions(actions: list[dict[str, Any]]) -> list[dict[str, An
     out = [dict(a) for a in actions]
     templates = [
         {
-            "action": "Confirm the new appointment time with the clinic or scheduler",
+            "action": "Patrick: confirm any unclear details from the email with the sender or clinic",
+            "deadline": "Within 48 hours",
+            "responsible_party": "Patrick (caregiver)",
+        },
+        {
+            "action": "Patrick: document the outcome and next follow-up date in your care log",
             "deadline": "Within 24 hours",
-            "responsible_party": "Caregiver-CEO",
+            "responsible_party": "Patrick (caregiver)",
         },
         {
-            "action": "Update or cancel medical transport and request revised pickup window",
-            "deadline": "Within 12 hours of confirmation",
-            "responsible_party": "Primary caregiver / transport coordinator",
-        },
-        {
-            "action": "Notify family members who share driving or coverage duties",
-            "deadline": "Same day",
-            "responsible_party": "Caregiver-CEO",
+            "action": "Patrick: align with family only if the email implies shared coverage or scheduling impact",
+            "deadline": "As needed",
+            "responsible_party": "Patrick (caregiver)",
         },
     ]
     i = 0
@@ -79,19 +79,27 @@ class CouncilAgent:
     a final actionable recommendation with explicit reasoning and tradeoffs.
     """
 
-    _SYSTEM = """You are the Council — a wise decision-making body for a Caregiver-CEO.
+    _SYSTEM = """You are the Council — a wise, practical decision-making body for Patrick,
+a Caregiver-CEO managing his elderly father's medical care.
 
-You receive analysis from three specialized agents (email parsing, institutional memory, logistics).
-You must produce a clear, compassionate, actionable recommendation for an exhausted family leader balancing work, children, and elder care.
+Patrick is exhausted, time-pressured, and needs CLEAR, SPECIFIC, ACTIONABLE guidance
+tailored to what this specific email is actually about.
 
-Requirements:
-- recommendation: 2–4 sentences the caregiver can act on today.
-- reasoning: bullet-style strings explaining why you chose this path.
-- tradeoffs: honest downsides or risks (time, money, stress, clinical ambiguity).
-- priority_actions: at least 3 objects, each with keys action, deadline, responsible_party (specific roles or names if known from context).
-- confidence_score: your subjective 0.0–1.0 confidence — it will be merged with a data-completeness score, so calibrate honestly.
+CRITICAL RULES:
+1. Read the actual email content from email_analysis carefully
+2. Your recommendation must directly address WHAT THIS SPECIFIC EMAIL IS ABOUT
+3. Do NOT give generic transport/clinic advice if the email isn't about transport
+4. If it's a booking request — recommend how to book it
+5. If it's a reschedule — recommend how to handle the reschedule
+6. If it's a general inquiry — recommend how to respond
+7. Priority actions must reference specific details from the email (times, names, services)
+8. reasoning must explain WHY these specific actions for THIS specific situation
+9. tradeoffs must be real tradeoffs for THIS situation, not generic risk statements
 
-Never invent clinical facts; ground everything in the provided JSON."""
+Format your recommendation as if speaking directly to Patrick:
+"Given this [specific situation], you should [specific action]..."
+
+Confidence score: be honest — 0.9+ only if all details are clear and memory context matched."""
 
     def __init__(self) -> None:
         self._llm = get_llm_creative()

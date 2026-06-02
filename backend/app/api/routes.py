@@ -8,7 +8,7 @@ import uuid
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sse_starlette.sse import EventSourceResponse
 
 from app.core.workflow_serialization import build_process_email_response, jsonable
@@ -17,6 +17,7 @@ from app.memory.memory_store import (
     create_session,
     get_audit_log,
     get_session,
+    list_patient_profiles,
     update_session_status,
 )
 
@@ -25,7 +26,25 @@ log = logging.getLogger("careflow.api")
 router = APIRouter(tags=["api"])
 
 class ProcessEmailRequest(BaseModel):
-    email: str = Field(..., min_length=1, description="Raw email body to process")
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "email": (
+                    "Hi Patrick,\n\nYour father's neurology appointment has been moved "
+                    "from Tuesday 10:30 AM to Wednesday 2:00 PM.\n\n"
+                    "Please confirm transportation arrangements.\n\n"
+                    "Regards,\nDr. Patel's Office"
+                )
+            }
+        }
+    )
+
+    email: str = Field(
+        ...,
+        min_length=10,
+        max_length=10000,
+        description="Raw email body to process through the multi-agent pipeline",
+    )
 
 
 class SessionApproveRequest(BaseModel):
@@ -100,7 +119,7 @@ async def process_email(body: ProcessEmailRequest) -> dict[str, Any]:
 
 @router.get("/process-email/stream")
 async def process_email_stream(
-    email: Annotated[str, Query(..., min_length=1, description="URL-encoded email body")],
+    email: Annotated[str, Query(..., min_length=10, max_length=10000, description="URL-encoded email body")],
 ) -> EventSourceResponse:
     async def event_generator() -> Any:
         session_id = str(uuid.uuid4())
@@ -161,6 +180,17 @@ async def process_email_stream(
                     log.exception("Failed to persist streamed session %s", session_id)
 
     return EventSourceResponse(event_generator())
+
+
+@router.get("/sessions")
+async def list_sessions() -> dict[str, Any]:
+    """List recent workflow sessions — demonstrates persistent memory."""
+    profiles = await list_patient_profiles()
+    return {
+        "patient_profiles_count": len(profiles),
+        "patient_profiles": profiles,
+        "message": "Patient profiles persisted in SQLite across sessions",
+    }
 
 
 @router.post("/sessions/{session_id}/approve")

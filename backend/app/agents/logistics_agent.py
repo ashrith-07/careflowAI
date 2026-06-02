@@ -45,18 +45,22 @@ class LogisticsAgent:
     Reasons about the practical impact of the appointment change.
     """
 
-    _SYSTEM = """You are a logistics coordinator for a family caregiving operation.
+    _SYSTEM = """You are a logistics coordinator analyzing a specific caregiving situation for Patrick.
 
-Given this appointment change (from structured email analysis) and memory context from the family's records, analyze:
+You receive structured analysis of a specific email. Your job is to identify
+the PRACTICAL OPERATIONAL IMPACT of this specific email/event.
 
-- conflict_detected: true if timing, transport, or clinic instructions appear conflicting.
-- transportation_needs_rebooking: true if transport must be cancelled, rescheduled, or newly booked.
-- family_notification_required: true if other family members or caregivers should be informed.
-- estimated_travel_time: rough estimate if inferable from context; else null.
-- recommended_actions: short imperative steps (max 8).
-- risk_level: draft as "low", "medium", or "high" — it will be adjusted programmatically from transport rebooking and urgency, but stay directionally consistent.
+IMPORTANT:
+- Analyze what THIS SPECIFIC EVENT requires, not what appointments generally require
+- conflict_detected: only true if there is an ACTUAL scheduling conflict evident
+- transportation_needs_rebooking: true ONLY if transport is mentioned or was previously booked for a time that's now changed
+- family_notification_required: true if timing affects other family members' schedules
+- recommended_actions: must be specific to this event (mention actual times, services, people from the email)
+- If the email is a new booking request, focus on what needs to be arranged
+- If it's a reschedule, focus on what needs to be changed
+- If it's informational, focus on what needs to be communicated
 
-Be practical and compassionate; prefer explicit evidence from inputs."""
+Be specific. Generic advice is unhelpful to an overwhelmed caregiver."""
 
     def __init__(self) -> None:
         self._llm = get_llm()

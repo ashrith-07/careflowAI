@@ -1,5 +1,3 @@
-"""LangGraph StateGraph orchestrator for CareFlow AI."""
-
 from __future__ import annotations
 
 import traceback
@@ -11,6 +9,23 @@ from langgraph.graph import StateGraph, END
 from app.agents import CouncilAgent, EmailAgent, LogisticsAgent, MemoryAgent
 from app.core.workflow_serialization import build_process_email_response, jsonable
 from app.graph.state import WorkflowState
+
+__doc__ = """
+CareFlow AI — LangGraph StateGraph Orchestrator
+
+Architecture:
+    email_agent → memory_agent → logistics_agent → council_agent → END
+
+Each node is an async function wrapping an agent class. The shared WorkflowState
+TypedDict accumulates outputs across nodes using LangGraph's reducer pattern
+(errors and audit_trail use operator.add for list merging).
+
+Conditional edges provide error short-circuiting: if any agent sets
+status="failed", the graph routes directly to END instead of continuing.
+
+Streaming: run_workflow_stream() yields SSE-compatible dicts as each node
+completes, enabling real-time frontend updates without polling.
+"""
 
 
 def route_after_agent(state: WorkflowState, next_agent_name: str) -> str:

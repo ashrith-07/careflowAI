@@ -296,38 +296,51 @@ async def seed_demo_data() -> None:
             ("Father",),
         )
         row = await cursor.fetchone()
-        if row and int(row[0]) > 0:
-            return
+        father_exists = bool(row and int(row[0]) > 0)
+
+    if not father_exists:
+        await upsert_patient_profile(
+            {
+                "patient_name": "Father",
+                "doctor_name": "Dr. Patel",
+                "preferred_transport": "Medical Transport Service",
+                "notes": (
+                    "Neurology patient under Dr. Patel's care. "
+                    "Requires wheelchair assistance for all appointments. "
+                    "Medical Transport Service must be booked minimum 48 hours in advance. "
+                    "Patrick is primary caregiver and point of contact. "
+                    "Previous appointments consistently on Tuesday mornings."
+                ),
+            }
+        )
+        await add_appointment(
+            {
+                "patient_name": "Father",
+                "doctor_name": "Dr. Patel",
+                "appointment_date": "2026-05-06",
+                "appointment_time": "10:30 AM",
+                "status": "completed",
+            }
+        )
+        await add_appointment(
+            {
+                "patient_name": "Father",
+                "doctor_name": "Dr. Patel",
+                "appointment_date": "2026-04-01",
+                "appointment_time": "10:30 AM",
+                "status": "completed",
+            }
+        )
 
     await upsert_patient_profile(
         {
-            "patient_name": "Father",
-            "doctor_name": "Dr. Patel",
-            "preferred_transport": "Medical Transport Service",
+            "patient_name": "Patrick",
+            "doctor_name": "unknown",
+            "preferred_transport": "self-drive",
             "notes": (
-                "Neurology patient under Dr. Patel's care. "
-                "Requires wheelchair assistance for all appointments. "
-                "Medical Transport Service must be booked minimum 48 hours in advance. "
-                "Patrick is primary caregiver and point of contact. "
-                "Previous appointments consistently on Tuesday mornings."
+                "Patrick is the primary Caregiver-CEO. He manages his father's care. "
+                "Patrick is NOT a patient — he is the caregiver. "
+                "If emails are addressed to Patrick or from Patrick, he is the sender/recipient, not the patient."
             ),
-        }
-    )
-    await add_appointment(
-        {
-            "patient_name": "Father",
-            "doctor_name": "Dr. Patel",
-            "appointment_date": "2026-05-06",
-            "appointment_time": "10:30 AM",
-            "status": "completed",
-        }
-    )
-    await add_appointment(
-        {
-            "patient_name": "Father",
-            "doctor_name": "Dr. Patel",
-            "appointment_date": "2026-04-01",
-            "appointment_time": "10:30 AM",
-            "status": "completed",
         }
     )

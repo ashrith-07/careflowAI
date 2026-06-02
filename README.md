@@ -12,23 +12,28 @@ Inbound email flows through a **LangGraph** linear pipeline: **Email → Memory 
 
 ```mermaid
 flowchart TD
-    A[FastAPI\nPOST /api/process-email] --> B[LangGraph StateGraph]
-    B --> C[Email Agent\nExtract & Structure]
-    C --> D[Memory Agent\nRetrieve Context]
-    D --> E[Logistics Agent\nAnalyze Conflicts]
-    E --> F[Council Agent\nDeliberate & Decide]
-    F --> G[Final Recommendation\nHuman Approval]
-    B -.->|Shared State| H[(SQLite\nMemory Store)]
-    H -.-> D
+    A[FastAPI\nPOST /api/process-email\nGET /stream] --> B[LangGraph StateGraph\nShared WorkflowState]
+    B --> C[Email Agent\nGroq LLM · Structured Output\nExtract + Classify]
+    C --> D{Error?}
+    D -->|Yes| Z[END]
+    D -->|No| E[Memory Agent\nSQLite Query\nContext Enrichment]
+    E --> F[Logistics Agent\nConflict Detection\nTransport Analysis]
+    F --> G[Council Agent\nDeliberation\nPriority Actions]
+    G --> H[awaiting_approval\nHuman-in-the-loop]
+    H --> I[approved / rejected / review]
+    B -.->|Audit log| J[(SQLite\npatient_profiles\nappointments\naudit_log\nworkflow_sessions)]
 
     style A fill:#1a1a2e,stroke:#6C63FF,color:#fff
     style B fill:#1a1a2e,stroke:#6C63FF,color:#fff
     style C fill:#1a1a2e,stroke:#FF6B6B,color:#fff
+    style E fill:#1a1a2e,stroke:#F59E0B,color:#fff
+    style F fill:#1a1a2e,stroke:#00D4AA,color:#fff
+    style G fill:#1a1a2e,stroke:#6C63FF,color:#fff
+    style H fill:#1a1a2e,stroke:#00D4AA,color:#fff
+    style I fill:#1a1a2e,stroke:#888888,color:#fff
+    style J fill:#1a1a2e,stroke:#888888,color:#fff
+    style Z fill:#1a1a2e,stroke:#555555,color:#fff
     style D fill:#1a1a2e,stroke:#F59E0B,color:#fff
-    style E fill:#1a1a2e,stroke:#00D4AA,color:#fff
-    style F fill:#1a1a2e,stroke:#6C63FF,color:#fff
-    style G fill:#1a1a2e,stroke:#00D4AA,color:#fff
-    style H fill:#1a1a2e,stroke:#888,color:#fff
 ```
 
 ---
@@ -195,6 +200,7 @@ All JSON routes below are prefixed with **`/api`** (router mount). **`GET /`** i
 | `GET` | `/` | Root health: `status`, `app`. |
 | `GET` | `/api/health` | Liveness: `status`, `app`, `version` (`1.0.0`). |
 | `GET` | `/api/demo` | Canonical **Patrick / Dr. Patel** assignment email plus `context` (patient, doctor, caregiver, scenario). |
+| `GET` | `/api/sessions` | SQLite-backed **patient profiles** snapshot (count + rows) — demonstrates persistent memory across sessions. |
 | `POST` | `/api/process-email` | Body `{ "email": "..." }` — full workflow; returns serialized result; **500** with structured `detail` on LLM/workflow or persistence errors. |
 | `GET` | `/api/process-email/stream` | Query **`email=`** (URL-encoded) — SSE: `agent_started`, `agent_completed`, `workflow_completed`, `workflow_failed`, and **`error`** events with JSON payloads. |
 | `POST` | `/api/sessions/{session_id}/approve` | Body `{ "action": "approve"\|"reject"\|"review", "notes": "" }`. |

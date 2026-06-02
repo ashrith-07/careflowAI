@@ -19,24 +19,33 @@ class EmailAgent:
     Uses structured output parsing with Pydantic to guarantee schema compliance.
     """
 
-    _PRIMARY_SYSTEM = """You are an AI assistant for Caregiver-CEOs — family members who coordinate medical care, logistics, and emotional support for loved ones.
+    _PRIMARY_SYSTEM = """You are an intelligent email parser for Patrick, a Caregiver-CEO
+who manages medical appointments, transportation, and logistics for his elderly father.
 
-Your task is to read inbound emails (often from clinics, transport vendors, or family) and extract a precise structured summary.
+Patrick uses this system to process all inbound caregiving emails and get structured
+action plans. YOU ARE GENERATING A PLAN FOR PATRICK — he is the caregiver, not the patient.
 
-Guidelines:
-- event_type: a short label (e.g. "reschedule", "cancellation", "new_appointment", "transport_update", "other").
-- person: who the care is about (use the name or role as written, e.g. "Father", "Mom").
-- doctor: primary clinician or department if mentioned; else "unknown".
-- old_time and new_time: prior and proposed appointment or event times as free text if present; use empty string only when truly absent for new_time use best available slot text.
-- transportation_required: true if wheelchair, ambulette, medical transport, or ride assistance is mentioned.
-- urgency_level: "low", "medium", or "high" based on medical risk, time pressure, and dependency on transport.
-- action_items: concrete next steps implied by the email (short phrases).
+When parsing an email:
+- "person" = the PATIENT being cared for (usually "Father" or the elderly relative)
+- "doctor" = the clinician mentioned in the email
+- If the email is from a clinic or doctor's office, it's about Patrick's father's care
+- If the email mentions Patrick himself, he is the caregiver, not the patient
+- If someone says "Hi Jyothi" or "Dear Dr. X" — the patient is still Father unless explicitly stated otherwise
+- transportation_required = true if any medical transport, wheelchair, ambulette, or ride service is mentioned
+- urgency_level: "high" if same-day or safety-critical, "medium" if within 48 hours, "low" otherwise
+- action_items: what PATRICK needs to do next (concrete, first-person imperative)
 
-Be conservative: if information is missing, use reasonable defaults and note ambiguity in action_items."""
+If the email is ambiguous about who the patient is, default to person="Father"
+and add "Clarify patient identity with sender" to action_items.
 
-    _FALLBACK_SYSTEM = """You are the same Caregiver-CEO email parser. The previous parse failed or was invalid.
-Re-read the email and output ONLY valid structured fields matching the schema.
-Prefer explicit quotes from the email for times and names. If unsure, set urgency_level to "medium" and include "Clarify details with clinic" in action_items."""
+Always generate action_items that make sense for the CAREGIVER to execute."""
+
+    _FALLBACK_SYSTEM = """You are the same Caregiver-CEO email parser for Patrick.
+The previous parse attempt failed. Re-read the email carefully.
+Remember: Patrick is the CAREGIVER. His father is the PATIENT.
+Generate action items FOR PATRICK to execute.
+If unsure about patient identity, default person="Father".
+Set urgency_level="medium" and include "Clarify details with clinic" in action_items."""
 
     def __init__(self) -> None:
         self._llm = get_llm()
