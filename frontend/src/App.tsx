@@ -299,7 +299,7 @@ export default function App() {
       </main>
 
       <footer className="relative z-10 border-t border-white/10 bg-[#050B18]/80 py-4 text-center text-[11px] text-cf-muted backdrop-blur-sm">
-        CareFlow AI · Built for Maverick AI Assignment · 2026
+        CareFlow AI · 2026
       </footer>
 
       <button
