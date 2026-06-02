@@ -66,7 +66,7 @@ python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
-# Edit .env and set GROQ_API_KEY
+# Edit .env: set GROQ_API_KEY. For local SQLite, set DATABASE_URL=./careflow.db (defaults in code target Render; override for laptop).
 ```
 
 ### 3. Frontend
@@ -102,6 +102,10 @@ npm run dev
 python test_workflow.py
 ```
 
+### Deploy backend (Render)
+
+Use `backend/render.yaml` as a blueprint (set the service **root directory** to `backend` if the repo is monorepo). Configure `GROQ_API_KEY` in the Render dashboard. Persistent disk mounts at `/opt/render/project/src` so `careflow.db` survives redeploys.
+
 ---
 
 ## API reference
@@ -109,7 +113,7 @@ python test_workflow.py
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/` | Root health (`status`, `app`). |
-| `GET` | `/api/health` | API health and agent list. |
+| `GET` | `/api/health` | Liveness for load balancers: `status`, `app`, `version`. |
 | `GET` | `/api/demo` | Canonical assignment email plus scenario `context` (patient, doctor, caregiver). |
 | `POST` | `/api/process-email` | JSON `{ "email": "..." }` — run full workflow; returns serialized workflow result. |
 | `GET` | `/api/process-email/stream` | Query `email=` — SSE stream (`agent_started`, `agent_completed`, `workflow_completed`, `workflow_failed`, `error`). |

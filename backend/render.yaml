@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: careflow-ai-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        value: /opt/render/project/src/careflow.db
+      - key: CORS_ORIGINS
+        value: '["https://careflow-ai.vercel.app","http://localhost:5173"]'
+    disk:
+      name: careflow-db
+      mountPath: /opt/render/project/src
+      sizeGB: 1

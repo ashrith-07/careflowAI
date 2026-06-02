@@ -218,9 +218,5 @@ async def get_session_audit(session_id: str) -> dict[str, Any]:
 
 
 @router.get("/health")
-def api_health() -> dict[str, Any]:
-    return {
-        "status": "healthy",
-        "agents": ["email", "memory", "logistics", "council"],
-        "version": "1.0.0",
-    }
+async def health() -> dict[str, str]:
+    return {"status": "healthy", "app": "CareFlow AI", "version": "1.0.0"}
