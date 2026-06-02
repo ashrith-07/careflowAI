@@ -103,7 +103,7 @@ export function ResultPanel({
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 28 }}
           transition={{ type: "spring", stiffness: 260, damping: 30 }}
-          className="glass-card flex max-h-[calc(100vh-10rem)] flex-col gap-4 overflow-hidden p-5"
+          className="glass-card flex min-h-0 max-h-[min(70vh,calc(100vh-14rem))] flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-y-contain p-5"
         >
           <div className="agent-line w-full shrink-0" />
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -207,13 +207,6 @@ export function ResultPanel({
                 className="rounded-lg bg-cf-coral/90 px-4 py-2 text-sm font-semibold text-white transition hover:bg-cf-coral"
               >
                 Reject
-              </button>
-              <button
-                type="button"
-                onClick={onReview}
-                className="rounded-lg border border-cf-amber/50 bg-cf-amber/15 px-4 py-2 text-sm font-semibold text-cf-amber transition hover:bg-cf-amber/25"
-              >
-                Review
               </button>
             </motion.div>
           ) : null}

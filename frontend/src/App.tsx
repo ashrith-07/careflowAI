@@ -269,7 +269,7 @@ export default function App() {
           </div>
         </section>
 
-        <aside className="flex w-full min-w-0 flex-shrink-0 flex-col gap-5 md:w-[30%]">
+        <aside className="flex w-full min-h-0 min-w-0 flex-shrink-0 flex-col gap-5 md:w-[30%]">
           <ResultPanel
             result={wf.result}
             visible={resultVisible}
