@@ -199,21 +199,21 @@ export function ResultPanel({
                 onClick={onApprove}
                 className="rounded-lg bg-cf-teal/90 px-4 py-2 text-sm font-semibold text-[#050B18] shadow-sm transition hover:bg-cf-teal"
               >
-                ✓ Approve
+                Approve
               </button>
               <button
                 type="button"
                 onClick={onReject}
                 className="rounded-lg bg-cf-coral/90 px-4 py-2 text-sm font-semibold text-white transition hover:bg-cf-coral"
               >
-                ✗ Reject
+                Reject
               </button>
               <button
                 type="button"
                 onClick={onReview}
                 className="rounded-lg border border-cf-amber/50 bg-cf-amber/15 px-4 py-2 text-sm font-semibold text-cf-amber transition hover:bg-cf-amber/25"
               >
-                ⟳ Review
+                Review
               </button>
             </motion.div>
           ) : null}

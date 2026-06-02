@@ -1,6 +1,5 @@
 import { clsx } from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
-import { Database, Gavel, Mail, Truck, type LucideIcon } from "lucide-react";
 
 const ACCENTS: Record<string, string> = {
   email_agent: "border-l-cf-coral",
@@ -9,39 +8,19 @@ const ACCENTS: Record<string, string> = {
   council_agent: "border-l-cf-purple",
 };
 
-const LUCIDE_BY_NAME: Record<string, LucideIcon> = {
-  mail: Mail,
-  database: Database,
-  memory: Database,
-  truck: Truck,
-  gavel: Gavel,
-};
-
 export interface AgentCardProps {
   id: string;
   name: string;
   description: string;
-  icon: string;
   status: "idle" | "running" | "completed" | "failed";
   output?: object;
   duration?: number;
-}
-
-function IconMark({ icon }: { icon: string }) {
-  const trimmed = icon.trim();
-  if (/[\u{1F300}-\u{1FAFF}]/u.test(trimmed) || trimmed.length <= 4) {
-    return <span className="text-lg leading-none">{trimmed}</span>;
-  }
-  const key = trimmed.toLowerCase();
-  const Cmp = LUCIDE_BY_NAME[key] ?? Mail;
-  return <Cmp className="h-5 w-5 text-cf-text/90" aria-hidden />;
 }
 
 export function AgentCard({
   id,
   name,
   description,
-  icon,
   status,
   output,
   duration,
@@ -75,9 +54,6 @@ export function AgentCard({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-start gap-2">
-            <div className="mt-0.5 text-cf-muted">
-              <IconMark icon={icon} />
-            </div>
             <div className="min-w-0">
               <h3 className="text-sm font-semibold tracking-wide text-cf-text">{name}</h3>
               <p className="mt-0.5 text-xs leading-relaxed text-cf-muted">{description}</p>
@@ -147,23 +123,9 @@ function StatusGlyph({ status }: { status: AgentCardProps["status"] }) {
     );
   }
   if (status === "completed") {
-    return (
-      <span
-        className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-cf-teal/20 text-cf-teal"
-        title="Completed"
-      >
-        ✓
-      </span>
-    );
+    return <span className="mt-1 block h-2 w-2 rounded-full bg-cf-teal/85" title="Completed" />;
   }
-  return (
-    <span
-      className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-cf-coral/20 text-sm text-cf-coral"
-      title="Failed"
-    >
-      ✗
-    </span>
-  );
+  return <span className="mt-1 block h-2 w-2 rounded-full bg-cf-coral/90" title="Failed" />;
 }
 
 function JsonColored({ obj }: { obj: object }) {

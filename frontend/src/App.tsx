@@ -1,6 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { HelpCircle, X } from "lucide-react";
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 
 import { AgentCard } from "@/components/AgentCard";
 import { ApprovalModal } from "@/components/ApprovalModal";
@@ -18,25 +17,21 @@ const AGENTS = [
     id: "email_agent",
     name: "Email Agent",
     description: "Extracts structured information from inbound caregiver and clinic messages.",
-    icon: "mail",
   },
   {
     id: "memory_agent",
     name: "Memory Agent",
     description: "Pulls patient context, history, and constraints from institutional memory.",
-    icon: "database",
   },
   {
     id: "logistics_agent",
     name: "Logistics Agent",
     description: "Reasons about appointments, transport windows, and scheduling conflicts.",
-    icon: "truck",
   },
   {
     id: "council_agent",
     name: "Council Agent",
     description: "Synthesizes analyses into a compassionate, actionable recommendation.",
-    icon: "gavel",
   },
 ] as const;
 
@@ -79,48 +74,6 @@ function OrbitPanel(props: { activeAgent: string | null; completedAgents: string
   );
 }
 
-function LoadingSplash({ onDone }: { onDone: () => void }) {
-  const [fade, setFade] = useState(false);
-  const finished = useRef(false);
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setFade(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
-
-  return (
-    <motion.div
-      className="fixed inset-0 z-[300] flex flex-col items-center justify-center bg-[#030712]"
-      initial={{ opacity: 1 }}
-      animate={{ opacity: fade ? 0 : 1 }}
-      transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
-      onAnimationComplete={() => {
-        if (fade && !finished.current) {
-          finished.current = true;
-          onDone();
-        }
-      }}
-    >
-      <motion.div
-        initial={{ scale: 0.92, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.55, ease: "easeOut" }}
-        className="flex flex-col items-center gap-4"
-      >
-        <motion.div
-          className="h-16 w-16 rounded-2xl bg-gradient-to-br from-cf-purple to-cf-teal opacity-90 shadow-[0_0_48px_rgba(108,99,255,0.55)]"
-          animate={{ rotate: [0, 6, -6, 0], y: [0, -4, 0] }}
-          transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold tracking-[0.2em] text-cf-text">CareFlow AI</h1>
-          <p className="mt-2 text-xs uppercase tracking-[0.35em] text-cf-muted">Initializing console</p>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
-
 function HelpModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
     <AnimatePresence>
@@ -146,10 +99,10 @@ function HelpModal({ open, onClose }: { open: boolean; onClose: () => void }) {
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-3 top-3 rounded-lg p-2 text-cf-muted transition hover:bg-white/10 hover:text-cf-text"
+              className="absolute right-3 top-3 rounded-lg px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-cf-muted transition hover:bg-white/10 hover:text-cf-text"
               aria-label="Close help"
             >
-              <X className="h-5 w-5" />
+              Close
             </button>
             <h2 id="help-title" className="pr-10 text-lg font-semibold text-cf-text">
               Quick walkthrough
@@ -194,7 +147,6 @@ function HelpModal({ open, onClose }: { open: boolean; onClose: () => void }) {
 export default function App() {
   const wf = useWorkflow();
   const [modalOpen, setModalOpen] = useState(false);
-  const [splashMounted, setSplashMounted] = useState(true);
   const [helpOpen, setHelpOpen] = useState(false);
 
   useEffect(() => {
@@ -209,12 +161,6 @@ export default function App() {
 
   return (
     <div className="cf-app-shell relative min-h-screen text-cf-text">
-      <AnimatePresence>
-        {splashMounted ? (
-          <LoadingSplash key="splash" onDone={() => setSplashMounted(false)} />
-        ) : null}
-      </AnimatePresence>
-
       <div className="hud-scan z-[1]" />
 
       <header className="relative z-20 border-b border-white/10 bg-[#050B18]/88 px-4 py-3 backdrop-blur-md md:px-8">
@@ -282,11 +228,7 @@ export default function App() {
         </div>
 
         <aside className="flex w-full min-w-0 flex-shrink-0 flex-col gap-6 md:w-[28%]">
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <motion.div initial={false}>
             <h1 className="text-2xl font-semibold tracking-wide text-cf-text drop-shadow-[0_0_28px_rgba(108,99,255,0.45)]">
               CareFlow AI
             </h1>
@@ -318,7 +260,6 @@ export default function App() {
                   id={a.id}
                   name={a.name}
                   description={a.description}
-                  icon={a.icon}
                   status={cardStatus(a.id, wf)}
                   output={snap?.output}
                   duration={snap?.durationMs}
@@ -365,7 +306,9 @@ export default function App() {
         className="fixed bottom-6 right-6 z-[200] flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-[#0A1628]/95 text-cf-text shadow-glow-purple backdrop-blur-md transition hover:border-cf-purple/50 hover:bg-cf-purple/20"
         aria-label="Open help walkthrough"
       >
-        <HelpCircle className="h-6 w-6 text-cf-purple" />
+        <span className="text-sm font-semibold tracking-wide text-cf-purple" aria-hidden>
+          ?
+        </span>
       </button>
 
       <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />

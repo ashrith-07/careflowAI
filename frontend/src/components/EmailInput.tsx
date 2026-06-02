@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
 const MAX_STREAM = 1800;
@@ -26,7 +25,7 @@ export function EmailInput({ disabled, isRunning = false, onSubmit }: EmailInput
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={false}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45 }}
       className="glass-card flex flex-col gap-4 p-5"
@@ -69,7 +68,10 @@ export function EmailInput({ disabled, isRunning = false, onSubmit }: EmailInput
         className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-cf-purple via-[#5b52f0] to-[#4a42d8] px-5 py-3 text-sm font-semibold tracking-wide text-white shadow-glow-purple transition disabled:cursor-not-allowed disabled:opacity-40"
       >
         {isRunning ? (
-          <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+          <span
+            className="inline-block h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/25 border-t-white/90"
+            aria-hidden
+          />
         ) : null}
         <span className="relative z-10">
           {isRunning ? "Processing…" : "Process Email"}

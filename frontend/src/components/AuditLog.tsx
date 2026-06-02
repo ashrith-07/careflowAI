@@ -1,5 +1,4 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, ChevronUp, Download } from "lucide-react";
 import { Fragment, useEffect, useRef, useState } from "react";
 
 import type { AuditRow } from "@/hooks/useWorkflow";
@@ -69,7 +68,6 @@ export function AuditLog({ rows, defaultExpanded = false }: AuditLogProps) {
             disabled={rows.length === 0}
             className="inline-flex items-center gap-1 rounded-lg border border-white/15 bg-black/30 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-cf-muted transition hover:border-cf-purple/40 hover:text-cf-text disabled:opacity-30"
           >
-            <Download className="h-3.5 w-3.5" />
             Export JSON
           </button>
           <button
@@ -78,7 +76,9 @@ export function AuditLog({ rows, defaultExpanded = false }: AuditLogProps) {
             onClick={() => setOpen((v) => !v)}
             className="rounded-lg border border-white/10 p-2 text-cf-muted transition hover:bg-white/[0.05] hover:text-cf-text"
           >
-            {open ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            <span className="font-mono text-sm leading-none text-cf-muted" aria-hidden>
+              {open ? "▲" : "▼"}
+            </span>
           </button>
         </div>
       </div>

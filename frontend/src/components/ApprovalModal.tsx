@@ -128,7 +128,7 @@ export function ApprovalModal({
                   onClick={() => onDecision("approve", notes)}
                   className="rounded-xl bg-emerald-500/90 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-emerald-500 disabled:opacity-40"
                 >
-                  ✓ Approve
+                  Approve
                 </button>
                 <button
                   type="button"
@@ -138,7 +138,7 @@ export function ApprovalModal({
                     ? "rounded-xl bg-cf-coral px-4 py-2.5 text-sm font-semibold text-white ring-2 ring-cf-coral/60 disabled:opacity-40"
                     : "rounded-xl bg-rose-600/85 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-600 disabled:opacity-40"}
                 >
-                  {rejectConfirm ? "Confirm reject" : "✗ Reject"}
+                  {rejectConfirm ? "Confirm reject" : "Reject"}
                 </button>
                 <button
                   type="button"
@@ -146,7 +146,7 @@ export function ApprovalModal({
                   onClick={() => onDecision("review", notes)}
                   className="rounded-xl border border-amber-400/50 bg-amber-500/15 px-4 py-2.5 text-sm font-semibold text-amber-200 transition hover:bg-amber-500/25 disabled:opacity-40"
                 >
-                  ⟳ Review
+                  Review
                 </button>
                 <button
                   type="button"
