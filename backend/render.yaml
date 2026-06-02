@@ -5,6 +5,9 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
+      # Pin Python so wheels (e.g. pydantic-core) install without Rust/maturin on read-only builders.
+      - key: PYTHON_VERSION
+        value: "3.11.11"
       - key: GROQ_API_KEY
         sync: false
       - key: DATABASE_URL

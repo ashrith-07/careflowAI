@@ -104,7 +104,7 @@ python test_workflow.py
 
 ### Deploy backend (Render)
 
-Use `backend/render.yaml` as a blueprint (set the service **root directory** to `backend` for a monorepo). Set `GROQ_API_KEY` in the dashboard. On the **free tier** there is no persistent disk: `DATABASE_URL=./careflow.db` uses ephemeral instance storage and **resets on redeploy**; `init_db` and `seed_demo_data` run on every startup so schema and demo data are recreated automatically.
+Use `backend/render.yaml` as a blueprint (set the service **root directory** to `backend` for a monorepo). Set `GROQ_API_KEY` in the dashboard. The blueprint pins **`PYTHON_VERSION=3.11.11`** (and `backend/.python-version` matches): new Render Python services default to **3.14**, which can force a **source build** of `pydantic-core` (Rust/maturin) and fail on a read-only filesystem; 3.11 installs prebuilt wheels. A **`.python-version`** at the **repository root** is also included so deploys still pick 3.11 if the service root is accidentally left at the monorepo root. On the **free tier** there is no persistent disk: `DATABASE_URL=./careflow.db` uses ephemeral instance storage and **resets on redeploy**; `init_db` and `seed_demo_data` run on every startup so schema and demo data are recreated automatically.
 
 ---
 
