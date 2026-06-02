@@ -134,8 +134,10 @@ function HelpModal({ open, onClose }: { open: boolean; onClose: () => void }) {
               </li>
             </ol>
             <p className="mt-5 text-xs text-cf-muted/80">
-              Backend runs on port <code className="text-cf-teal/90">8000</code>; ensure{" "}
-              <code className="text-cf-purple/90">GROQ_API_KEY</code> is set in <code>backend/.env</code>.
+              Set <code className="text-cf-teal/90">VITE_API_URL</code> in <code>frontend/.env</code> (see{" "}
+              <code className="text-cf-purple/90">frontend/.env.example</code>) to your FastAPI base URL without the{" "}
+              <code>/api</code> suffix. Ensure <code className="text-cf-purple/90">GROQ_API_KEY</code> is set in{" "}
+              <code>backend/.env</code>.
             </p>
           </motion.div>
         </motion.div>

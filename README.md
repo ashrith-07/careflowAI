@@ -94,7 +94,7 @@ npm run dev
 
 ### 6. Open the app
 
-[http://localhost:5173](http://localhost:5173) — the Vite dev server proxies `/api` to `http://localhost:8000`.
+[http://localhost:5173](http://localhost:5173) — set `VITE_API_URL` in `frontend/.env` to your FastAPI origin (no `/api` suffix); when unset, the client uses `http://localhost:8000` for local development.
 
 **Quick pipeline test (no UI):** from `backend/` after configuring `.env`:
 

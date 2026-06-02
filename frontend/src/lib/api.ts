@@ -7,20 +7,29 @@ import type {
   WorkflowResult,
 } from "@/types/workflow";
 
-export const api = axios.create({
-  baseURL: "/api",
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+export const apiClient = axios.create({
+  baseURL: `${API_BASE_URL}/api`,
+  timeout: 120_000,
   headers: { "Content-Type": "application/json" },
 });
 
+/** @deprecated Use `apiClient`; kept for gradual migration. */
+export const api = apiClient;
+
 const MAX_STREAM_URL = 1800;
 
+export const getStreamUrl = (email: string) =>
+  `${API_BASE_URL}/api/process-email/stream?email=${encodeURIComponent(email)}`;
+
 export async function processEmail(email: string): Promise<WorkflowResult> {
-  const { data } = await api.post<WorkflowResult>("/process-email", { email });
+  const { data } = await apiClient.post<WorkflowResult>("/process-email", { email });
   return data;
 }
 
 /**
- * Opens SSE to /api/process-email/stream. Invokes onEvent for each parsed frame.
+ * Opens SSE to the streaming workflow endpoint. Invokes onEvent for each parsed frame.
  * Returns cleanup that closes the EventSource.
  */
 export function streamEmail(
@@ -36,7 +45,7 @@ export function streamEmail(
     return () => {};
   }
 
-  const url = `/api/process-email/stream?email=${encodeURIComponent(email)}`;
+  const url = getStreamUrl(email);
   const es = new EventSource(url);
 
   const emit = (ev: StreamEvent) => onEvent({ ...ev, at: ev.at ?? Date.now() });
@@ -164,7 +173,7 @@ export interface DemoPayload {
 
 /** GET /api/demo — canonical assignment email + scenario context. */
 export async function getDemo(): Promise<DemoPayload> {
-  const { data } = await api.get<DemoPayload>("/demo");
+  const { data } = await apiClient.get<DemoPayload>("/demo");
   return data;
 }
 
@@ -173,12 +182,12 @@ export async function approveSession(
   action: string,
   notes: string,
 ): Promise<void> {
-  await api.post(`/sessions/${id}/approve`, { action, notes });
+  await apiClient.post(`/sessions/${id}/approve`, { action, notes });
 }
 
 /** Resolves GET /sessions/:id into a WorkflowResult-shaped payload for the UI. */
 export async function getSession(id: string): Promise<WorkflowResult> {
-  const { data } = await api.get<SessionDetail>(`/sessions/${id}`);
+  const { data } = await apiClient.get<SessionDetail>(`/sessions/${id}`);
   const rd = data.result_data;
   if (rd && typeof rd === "object") {
     const w = rd as Partial<WorkflowResult> & Record<string, unknown>;
@@ -218,7 +227,7 @@ export async function getSession(id: string): Promise<WorkflowResult> {
 }
 
 export async function getAuditLog(id: string): Promise<AuditEntry[]> {
-  const { data } = await api.get<{ audit_log: AuditEntry[] }>(`/sessions/${id}/audit`);
+  const { data } = await apiClient.get<{ audit_log: AuditEntry[] }>(`/sessions/${id}/audit`);
   return data.audit_log ?? [];
 }
 
