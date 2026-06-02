@@ -102,3 +102,36 @@ body {
     ui-monospace, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono",
     monospace;
 }
+
+/* Subtle futuristic grid + slow drift (CSS only) */
+@keyframes cf-grid-shift {
+  0% {
+    background-position:
+      0 0,
+      0 0,
+      center top,
+      center bottom;
+  }
+  100% {
+    background-position:
+      40px 40px,
+      40px 40px,
+      center top,
+      center bottom;
+  }
+}
+
+.cf-app-shell {
+  background-color: var(--bg-primary);
+  background-image:
+    linear-gradient(rgba(108, 99, 255, 0.065) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(108, 99, 255, 0.065) 1px, transparent 1px),
+    radial-gradient(ellipse 85% 55% at 50% -15%, rgba(108, 99, 255, 0.13), transparent 55%),
+    radial-gradient(ellipse 75% 45% at 50% 110%, rgba(0, 212, 170, 0.09), transparent 50%);
+  background-size:
+    40px 40px,
+    40px 40px,
+    100% 100%,
+    100% 100%;
+  animation: cf-grid-shift 56s linear infinite;
+}

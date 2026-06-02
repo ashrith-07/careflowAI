@@ -17,12 +17,25 @@ from app.memory.memory_store import (
     create_session,
     get_audit_log,
     get_session,
+    list_patient_profiles,
     update_session_status,
 )
 
 log = logging.getLogger("careflow.api")
 
 router = APIRouter(tags=["api"])
+
+# Sample email for demos and frontend "assignment" pre-fill (Dr. Patel thread).
+SAMPLE_ASSIGNMENT_EMAIL = """
+Subject: Reschedule — Dr. Patel neurology
+
+Hi Care Team,
+
+Please move my father's neurology visit with Dr. Patel from Tuesday 10:00 AM to Friday 3:00 PM if possible. He uses wheelchair transport through MetroLift — please update the pickup window once the new slot is confirmed.
+
+Thanks,
+Priya (daughter / caregiver-CEO)
+""".strip()
 
 
 class ProcessEmailRequest(BaseModel):
@@ -32,6 +45,19 @@ class ProcessEmailRequest(BaseModel):
 class SessionApproveRequest(BaseModel):
     action: Literal["approve", "reject", "review"]
     notes: str = ""
+
+
+@router.get("/demo")
+async def demo_payload() -> dict[str, Any]:
+    """
+    Static sample email plus current patient_profiles rows from SQLite
+    (seeded at startup for the Maverick demo scenario).
+    """
+    profiles = await list_patient_profiles()
+    return {
+        "sample_email": SAMPLE_ASSIGNMENT_EMAIL,
+        "patient_profiles": profiles,
+    }
 
 
 @router.post("/process-email")

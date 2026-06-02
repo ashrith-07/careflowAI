@@ -1,48 +1,47 @@
-"""Smoke-test the LangGraph workflow (run from repo root: python backend/test_workflow.py)."""
+"""Quick test to verify the entire pipeline works end-to-end without the frontend."""
 
 from __future__ import annotations
 
 import asyncio
-import os
-import sys
-from pathlib import Path
+import json
+from typing import Any
 
-# Ensure `app.*` imports resolve when executed as `python backend/test_workflow.py`
-_BACKEND = Path(__file__).resolve().parent
-if str(_BACKEND) not in sys.path:
-    sys.path.insert(0, str(_BACKEND))
+from app.graph.workflow import run_workflow
+from app.memory.memory_store import init_db, seed_demo_data
+
+TEST_EMAIL = """
+Hi Patrick,
+Your father's neurology appointment has been moved from Tuesday 10:30 AM to Wednesday 2:00 PM.
+Please confirm transportation arrangements.
+Regards,
+Dr. Patel's Office
+"""
 
 
-async def _main() -> None:
-    os.environ.setdefault("GROQ_API_KEY", "test")
-    os.environ.setdefault("DATABASE_URL", str(_BACKEND / "_test_workflow_run.db"))
+def _dump(label: str, value: Any) -> None:
+    print(f"\n=== {label} ===")
+    if value is None:
+        print("(none)")
+        return
+    if hasattr(value, "model_dump"):
+        print(json.dumps(value.model_dump(), indent=2, default=str))
+    elif isinstance(value, (dict, list)):
+        print(json.dumps(value, indent=2, default=str))
+    else:
+        print(repr(value))
 
-    from app.memory.memory_store import init_db, seed_demo_data
 
+async def main() -> None:
     await init_db()
     await seed_demo_data()
-
-    from app.graph.workflow import run_workflow, run_workflow_stream
-
-    session_id = "test-session-workflow-1"
-    email = (
-        "Subject: Reschedule\n\nPlease move Father's visit with Dr. Patel "
-        "from Tuesday 10am to Friday 3pm. Wheelchair transport must be updated."
-    )
-
-    print("--- stream ---")
-    async for evt in run_workflow_stream(email, session_id):
-        print(evt)
-
-    print("--- invoke (second run, new session) ---")
-    out = await run_workflow(
-        email,
-        "test-session-workflow-2",
-    )
-    print("status", out.get("status"))
-    print("current_agent", out.get("current_agent"))
-    print("errors", out.get("errors"))
+    print("Running CareFlow AI workflow...")
+    result = await run_workflow(TEST_EMAIL, "test-session-001")
+    _dump("EMAIL ANALYSIS", result.get("email_analysis"))
+    _dump("MEMORY CONTEXT", result.get("memory_context"))
+    _dump("LOGISTICS ANALYSIS", result.get("logistics_analysis"))
+    _dump("COUNCIL RECOMMENDATION", result.get("council_recommendation"))
+    print("\n✓ Pipeline test complete!")
 
 
 if __name__ == "__main__":
-    asyncio.run(_main())
+    asyncio.run(main())

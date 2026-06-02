@@ -62,6 +62,17 @@ async def init_db() -> None:
         await db.commit()
 
 
+async def list_patient_profiles() -> list[dict[str, Any]]:
+    """Return all patient profile rows (for demo / diagnostics)."""
+    async with aiosqlite.connect(settings.DATABASE_URL) as db:
+        db.row_factory = aiosqlite.Row
+        cur = await db.execute(
+            "SELECT * FROM patient_profiles ORDER BY patient_name ASC",
+        )
+        rows = await cur.fetchall()
+        return [_row_to_dict(r) for r in rows]
+
+
 async def get_patient_profile(patient_name: str) -> dict[str, Any] | None:
     async with aiosqlite.connect(settings.DATABASE_URL) as db:
         db.row_factory = aiosqlite.Row

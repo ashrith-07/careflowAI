@@ -152,6 +152,17 @@ export function streamEmail(
   };
 }
 
+export interface DemoPayload {
+  sample_email: string;
+  patient_profiles: Record<string, unknown>[];
+}
+
+/** GET /api/demo — sample email + patient profiles from SQLite. */
+export async function getDemo(): Promise<DemoPayload> {
+  const { data } = await api.get<DemoPayload>("/demo");
+  return data;
+}
+
 export async function approveSession(
   id: string,
   action: string,

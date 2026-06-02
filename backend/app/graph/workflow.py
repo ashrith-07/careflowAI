@@ -8,10 +8,7 @@ from typing import Any, cast
 
 from langgraph.graph import StateGraph, END
 
-from app.agents.council_agent import CouncilAgent
-from app.agents.email_agent import EmailAgent
-from app.agents.logistics_agent import LogisticsAgent
-from app.agents.memory_agent import MemoryAgent
+from app.agents import CouncilAgent, EmailAgent, LogisticsAgent, MemoryAgent
 from app.core.workflow_serialization import build_process_email_response, jsonable
 from app.graph.state import WorkflowState
 
