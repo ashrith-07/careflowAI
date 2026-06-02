@@ -240,9 +240,11 @@ function SceneContent(props: AgentOrbitProps) {
         enablePan={false}
         maxPolarAngle={Math.PI / 2.05}
         minPolarAngle={Math.PI / 4.5}
+        target={[0, 0.12, 0]}
       />
 
-      <group ref={sceneSpin}>
+      {/* Slight world lift so the orbit reads visually centered in the frame */}
+      <group ref={sceneSpin} position={[0, 0.28, 0]}>
         {uniqueRadii.map((r) => (
           <OrbitTorus key={r} radius={r} />
         ))}
@@ -258,11 +260,11 @@ function SceneContent(props: AgentOrbitProps) {
 
 export function AgentOrbit({ activeAgent, completedAgents }: AgentOrbitProps) {
   return (
-    <div className="glass-card glow-purple relative h-[400px] w-full overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-transparent via-transparent to-[rgba(5,11,24,0.85)]" />
+    <div className="glass-card glow-purple relative h-full min-h-0 w-full overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-transparent via-transparent to-[rgba(5,11,24,0.55)]" />
       <Canvas
-        className="h-full w-full"
-        camera={{ position: [0, 3, 8], fov: 42, near: 0.1, far: 80 }}
+        className="block h-full w-full min-h-0"
+        camera={{ position: [0, 3.55, 8.6], fov: 40, near: 0.1, far: 80 }}
         gl={{ antialias: true, alpha: true }}
         dpr={[1, 2]}
       >

@@ -230,7 +230,11 @@ export default function App() {
         </div>
 
         <aside className="flex w-full min-w-0 flex-shrink-0 flex-col gap-6 md:w-[28%]">
-          <motion.div initial={false}>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          >
             <h1 className="text-2xl font-semibold tracking-wide text-cf-text drop-shadow-[0_0_28px_rgba(108,99,255,0.45)]">
               CareFlow AI
             </h1>
@@ -271,7 +275,10 @@ export default function App() {
           </div>
         </section>
 
-        <aside className="flex w-full min-h-0 min-w-0 flex-shrink-0 flex-col gap-5 md:w-[30%]">
+        <aside className="flex w-full min-h-0 min-w-0 flex-shrink-0 flex-col gap-4 md:w-[30%]">
+          <h2 className="text-[10px] font-bold uppercase tracking-widest text-cf-muted">
+            Recommendation &amp; audit
+          </h2>
           <ResultPanel
             result={wf.result}
             visible={resultVisible}
