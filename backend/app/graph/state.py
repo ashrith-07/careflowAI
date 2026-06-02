@@ -68,7 +68,7 @@ def create_initial_workflow_state(
         "memory_context": None,
         "logistics_analysis": None,
         "council_recommendation": None,
-        "current_agent": "",
+        "current_agent": "email_agent",
         "errors": [],
         "audit_trail": [],
         "status": "running",
