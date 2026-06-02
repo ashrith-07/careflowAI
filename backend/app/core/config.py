@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     )
 
     GROQ_API_KEY: str
-    DATABASE_URL: str = "/opt/render/project/src/careflow.db"
+    DATABASE_URL: str = "./careflow.db"
     CORS_ORIGINS: str = '["https://careflow-ai.vercel.app","http://localhost:5173"]'
     APP_NAME: str = "CareFlow AI"
 

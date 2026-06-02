@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import router
 from app.core.config import settings
-from app.memory.memory_store import init_db
+from app.memory.memory_store import init_db, seed_demo_data
 from app.middleware.request_logging import RequestLoggingMiddleware
 
 logging.basicConfig(
@@ -17,19 +17,12 @@ logging.basicConfig(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print(
-        """
- ██████╗ █████╗ ██████╗ ███████╗███████╗██╗      ██████╗ ██╗    ██╗
-██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝██║     ██╔═══██╗██║    ██║
-██║     ███████║██████╔╝█████╗  █████╗  ██║     ██║   ██║██║ █╗ ██║
-██║     ██╔══██║██╔══██╗██╔══╝  ██╔══╝  ██║     ██║   ██║██║███╗██║
-╚██████╗██║  ██║██║  ██║███████╗██║     ███████╗╚██████╔╝╚███╔███╔╝
- ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚══════╝ ╚═════╝  ╚══╝╚══╝
-CareFlow AI — Multi-Agent Caregiving Intelligence — v1.0.0
-"""
-    )
+    print("Starting CareFlow AI...")
     await init_db()
+    await seed_demo_data()
+    print("Database ready. Seed data loaded.")
     yield
+    print("Shutting down CareFlow AI...")
 
 
 app = FastAPI(

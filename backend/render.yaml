@@ -8,10 +8,6 @@ services:
       - key: GROQ_API_KEY
         sync: false
       - key: DATABASE_URL
-        value: /opt/render/project/src/careflow.db
+        value: ./careflow.db
       - key: CORS_ORIGINS
         value: '["https://careflow-ai.vercel.app","http://localhost:5173"]'
-    disk:
-      name: careflow-db
-      mountPath: /opt/render/project/src
-      sizeGB: 1

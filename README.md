@@ -66,7 +66,7 @@ python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 cp .env.example .env
-# Edit .env: set GROQ_API_KEY. For local SQLite, set DATABASE_URL=./careflow.db (defaults in code target Render; override for laptop).
+# Edit .env: set GROQ_API_KEY. DATABASE_URL defaults to ./careflow.db (cwd-relative; fine for local and Render free tier).
 ```
 
 ### 3. Frontend
@@ -104,7 +104,7 @@ python test_workflow.py
 
 ### Deploy backend (Render)
 
-Use `backend/render.yaml` as a blueprint (set the service **root directory** to `backend` if the repo is monorepo). Configure `GROQ_API_KEY` in the Render dashboard. Persistent disk mounts at `/opt/render/project/src` so `careflow.db` survives redeploys.
+Use `backend/render.yaml` as a blueprint (set the service **root directory** to `backend` for a monorepo). Set `GROQ_API_KEY` in the dashboard. On the **free tier** there is no persistent disk: `DATABASE_URL=./careflow.db` uses ephemeral instance storage and **resets on redeploy**; `init_db` and `seed_demo_data` run on every startup so schema and demo data are recreated automatically.
 
 ---
 

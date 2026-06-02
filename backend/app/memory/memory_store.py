@@ -13,8 +13,8 @@ from app.core.config import settings
 
 def _db_path() -> str:
     """
-    Resolve SQLite path relative to the backend package root so schema init and
-    all queries use the same file regardless of process cwd (e.g. uvicorn from repo root).
+    Resolve SQLite path: absolute paths as-is; relative paths against process cwd
+    (Render free tier and local uvicorn both use the service working directory).
     """
     raw = (settings.DATABASE_URL or "").strip()
     if raw.startswith("sqlite:///"):
@@ -22,8 +22,7 @@ def _db_path() -> str:
     p = Path(raw)
     if p.is_absolute():
         return str(p.resolve())
-    backend_dir = Path(__file__).resolve().parents[2]
-    return str((backend_dir / p).resolve())
+    return str((Path.cwd() / p).resolve())
 
 
 def _row_to_dict(row: aiosqlite.Row) -> dict[str, Any]:
@@ -81,12 +80,6 @@ async def init_db() -> None:
         for stmt in ddl:
             await db.execute(stmt)
         await db.commit()
-        cur = await db.execute("SELECT COUNT(*) FROM patient_profiles")
-        row = await cur.fetchone()
-        profile_count = int(row[0]) if row and row[0] is not None else 0
-
-    if profile_count == 0:
-        await seed_demo_data()
 
 
 async def list_patient_profiles() -> list[dict[str, Any]]:
@@ -297,12 +290,15 @@ async def get_session(session_id: str) -> dict[str, Any] | None:
 
 
 async def seed_demo_data() -> None:
-    # Check if already seeded
-    existing = await get_patient_profile("Father")
-    if existing:
-        return
+    async with aiosqlite.connect(_db_path()) as db:
+        cursor = await db.execute(
+            "SELECT COUNT(*) FROM patient_profiles WHERE patient_name = ?",
+            ("Father",),
+        )
+        row = await cursor.fetchone()
+        if row and int(row[0]) > 0:
+            return
 
-    # Patrick's father — the exact patient from the assignment
     await upsert_patient_profile(
         {
             "patient_name": "Father",
@@ -312,14 +308,11 @@ async def seed_demo_data() -> None:
                 "Neurology patient under Dr. Patel's care. "
                 "Requires wheelchair assistance for all appointments. "
                 "Medical Transport Service must be booked minimum 48 hours in advance. "
-                "Patrick (son) is primary caregiver and point of contact. "
-                "Patient lives at home — not a facility. "
+                "Patrick is primary caregiver and point of contact. "
                 "Previous appointments consistently on Tuesday mornings."
             ),
         }
     )
-
-    # Two past appointments for memory context
     await add_appointment(
         {
             "patient_name": "Father",
@@ -329,7 +322,6 @@ async def seed_demo_data() -> None:
             "status": "completed",
         }
     )
-
     await add_appointment(
         {
             "patient_name": "Father",
