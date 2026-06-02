@@ -12,6 +12,7 @@ from app.agents.council_agent import CouncilAgent
 from app.agents.email_agent import EmailAgent
 from app.agents.logistics_agent import LogisticsAgent
 from app.agents.memory_agent import MemoryAgent
+from app.core.workflow_serialization import build_process_email_response, jsonable
 from app.graph.state import WorkflowState
 
 
@@ -157,7 +158,7 @@ async def run_workflow_stream(
                     "data": {
                         "agent": agent_name,
                         "session_id": session_id,
-                        "updates": delta,
+                        "updates": jsonable(delta),
                     },
                 }
                 if delta.get("status") == "failed":
@@ -167,6 +168,7 @@ async def run_workflow_stream(
                             "session_id": session_id,
                             "errors": acc.get("errors"),
                             "failed_at_agent": agent_name,
+                            "result": build_process_email_response(session_id, acc),
                         },
                     }
                     return
@@ -187,6 +189,7 @@ async def run_workflow_stream(
                 "status": acc.get("status"),
                 "current_agent": acc.get("current_agent"),
                 "audit_trail_len": len(acc.get("audit_trail") or []),
+                "result": build_process_email_response(session_id, acc),
             },
         }
     except Exception as exc:
@@ -196,6 +199,7 @@ async def run_workflow_stream(
                 "session_id": session_id,
                 "error": f"{type(exc).__name__}: {exc}",
                 "traceback": traceback.format_exc(),
+                "result": build_process_email_response(session_id, acc),
             },
         }
 
