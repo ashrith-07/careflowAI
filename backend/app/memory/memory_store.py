@@ -6,8 +6,24 @@ import json
 from typing import Any
 
 import aiosqlite
+from pathlib import Path
 
 from app.core.config import settings
+
+
+def _db_path() -> str:
+    """
+    Resolve SQLite path relative to the backend package root so schema init and
+    all queries use the same file regardless of process cwd (e.g. uvicorn from repo root).
+    """
+    raw = (settings.DATABASE_URL or "").strip()
+    if raw.startswith("sqlite:///"):
+        raw = raw.removeprefix("sqlite:///").lstrip("/")
+    p = Path(raw)
+    if p.is_absolute():
+        return str(p.resolve())
+    backend_dir = Path(__file__).resolve().parents[2]
+    return str((backend_dir / p).resolve())
 
 
 def _row_to_dict(row: aiosqlite.Row) -> dict[str, Any]:
@@ -16,49 +32,54 @@ def _row_to_dict(row: aiosqlite.Row) -> dict[str, Any]:
 
 async def init_db() -> None:
     """Create all tables if they do not exist."""
-    async with aiosqlite.connect(settings.DATABASE_URL) as db:
-        await db.executescript(
-            """
-            CREATE TABLE IF NOT EXISTS patient_profiles (
-                id INTEGER PRIMARY KEY,
-                patient_name TEXT,
-                doctor_name TEXT,
-                preferred_transport TEXT,
-                notes TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE TABLE IF NOT EXISTS appointments (
-                id INTEGER PRIMARY KEY,
-                patient_name TEXT,
-                doctor_name TEXT,
-                appointment_date TEXT,
-                appointment_time TEXT,
-                status TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE TABLE IF NOT EXISTS audit_log (
-                id INTEGER PRIMARY KEY,
-                session_id TEXT,
-                agent_name TEXT,
-                input_data TEXT,
-                output_data TEXT,
-                duration_ms INTEGER,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE TABLE IF NOT EXISTS workflow_sessions (
-                id TEXT PRIMARY KEY,
-                email_content TEXT,
-                status TEXT,
-                result_data TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-            """
+    ddl = [
+        """
+        CREATE TABLE IF NOT EXISTS patient_profiles (
+            id INTEGER PRIMARY KEY,
+            patient_name TEXT,
+            doctor_name TEXT,
+            preferred_transport TEXT,
+            notes TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS appointments (
+            id INTEGER PRIMARY KEY,
+            patient_name TEXT,
+            doctor_name TEXT,
+            appointment_date TEXT,
+            appointment_time TEXT,
+            status TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS audit_log (
+            id INTEGER PRIMARY KEY,
+            session_id TEXT,
+            agent_name TEXT,
+            input_data TEXT,
+            output_data TEXT,
+            duration_ms INTEGER,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS workflow_sessions (
+            id TEXT PRIMARY KEY,
+            email_content TEXT,
+            status TEXT,
+            result_data TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """,
+    ]
+    async with aiosqlite.connect(_db_path()) as db:
+        for stmt in ddl:
+            await db.execute(stmt)
         await db.commit()
         cur = await db.execute("SELECT COUNT(*) FROM patient_profiles")
         row = await cur.fetchone()
@@ -70,7 +91,7 @@ async def init_db() -> None:
 
 async def list_patient_profiles() -> list[dict[str, Any]]:
     """Return all patient profile rows (for demo / diagnostics)."""
-    async with aiosqlite.connect(settings.DATABASE_URL) as db:
+    async with aiosqlite.connect(_db_path()) as db:
         db.row_factory = aiosqlite.Row
         cur = await db.execute(
             "SELECT * FROM patient_profiles ORDER BY patient_name ASC",
@@ -80,7 +101,7 @@ async def list_patient_profiles() -> list[dict[str, Any]]:
 
 
 async def get_patient_profile(patient_name: str) -> dict[str, Any] | None:
-    async with aiosqlite.connect(settings.DATABASE_URL) as db:
+    async with aiosqlite.connect(_db_path()) as db:
         db.row_factory = aiosqlite.Row
         cur = await db.execute(
             "SELECT * FROM patient_profiles WHERE patient_name = ? LIMIT 1",
@@ -96,7 +117,7 @@ async def upsert_patient_profile(data: dict[str, Any]) -> None:
     preferred_transport = data.get("preferred_transport")
     notes = data.get("notes")
 
-    async with aiosqlite.connect(settings.DATABASE_URL) as db:
+    async with aiosqlite.connect(_db_path()) as db:
         cur = await db.execute(
             "SELECT id FROM patient_profiles WHERE patient_name = ? LIMIT 1",
             (patient_name,),
@@ -130,7 +151,7 @@ async def get_recent_appointments(
     patient_name: str,
     limit: int = 5,
 ) -> list[dict[str, Any]]:
-    async with aiosqlite.connect(settings.DATABASE_URL) as db:
+    async with aiosqlite.connect(_db_path()) as db:
         db.row_factory = aiosqlite.Row
         cur = await db.execute(
             """
@@ -146,7 +167,7 @@ async def get_recent_appointments(
 
 
 async def add_appointment(data: dict[str, Any]) -> None:
-    async with aiosqlite.connect(settings.DATABASE_URL) as db:
+    async with aiosqlite.connect(_db_path()) as db:
         await db.execute(
             """
             INSERT INTO appointments
@@ -171,7 +192,7 @@ async def log_agent_action(
     output_data: dict[str, Any],
     duration_ms: int,
 ) -> None:
-    async with aiosqlite.connect(settings.DATABASE_URL) as db:
+    async with aiosqlite.connect(_db_path()) as db:
         await db.execute(
             """
             INSERT INTO audit_log
@@ -190,7 +211,7 @@ async def log_agent_action(
 
 
 async def get_audit_log(session_id: str) -> list[dict[str, Any]]:
-    async with aiosqlite.connect(settings.DATABASE_URL) as db:
+    async with aiosqlite.connect(_db_path()) as db:
         db.row_factory = aiosqlite.Row
         cur = await db.execute(
             """
@@ -217,7 +238,7 @@ async def get_audit_log(session_id: str) -> list[dict[str, Any]]:
 
 
 async def create_session(session_id: str, email_content: str) -> None:
-    async with aiosqlite.connect(settings.DATABASE_URL) as db:
+    async with aiosqlite.connect(_db_path()) as db:
         await db.execute(
             """
             INSERT INTO workflow_sessions (id, email_content, status)
@@ -233,7 +254,7 @@ async def update_session_status(
     status: str,
     result_data: dict[str, Any] | None = None,
 ) -> None:
-    async with aiosqlite.connect(settings.DATABASE_URL) as db:
+    async with aiosqlite.connect(_db_path()) as db:
         if result_data is None:
             await db.execute(
                 """
@@ -256,7 +277,7 @@ async def update_session_status(
 
 
 async def get_session(session_id: str) -> dict[str, Any] | None:
-    async with aiosqlite.connect(settings.DATABASE_URL) as db:
+    async with aiosqlite.connect(_db_path()) as db:
         db.row_factory = aiosqlite.Row
         cur = await db.execute(
             "SELECT * FROM workflow_sessions WHERE id = ? LIMIT 1",

@@ -1,16 +1,9 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 
+import { DEMO_EMAIL } from "@/constants/demoEmail";
+
 const MAX_STREAM = 1800;
-
-export const DEMO_EMAIL = `Hi Patrick,
-
-Your father's neurology appointment has been moved from Tuesday 10:30 AM to Wednesday 2:00 PM.
-
-Please confirm transportation arrangements.
-
-Regards,
-Dr. Patel's Office`;
 
 export interface EmailInputProps {
   disabled: boolean;
