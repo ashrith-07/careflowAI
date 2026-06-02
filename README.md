@@ -8,33 +8,27 @@ CareFlow AI is an end-to-end **multi-agent workflow** for **Caregiver-CEOs**: it
 
 Inbound email flows through a **LangGraph** linear pipeline: **Email → Memory → Logistics → Council**. Each node is an async agent backed by **Groq** (`llama-3.3-70b-versatile`). State is merged after each step; failures short-circuit to `END`. Results persist in **SQLite** (`workflow_sessions`, `audit_log`, `patient_profiles`, `appointments`).
 
-### Architecture (high level)
+### Architecture
 
-```
-                    ┌──────────────────────────────────────────┐
-                    │            FastAPI /api                  │
-                    │  POST /process-email  GET .../stream    │
-                    │  sessions/*  health  demo                │
-                    └──────────────────┬───────────────────────┘
-                                       │
-                    ┌───────────────────▼───────────────────────┐
-                    │         LangGraph StateGraph            │
-                    │  ┌─────────┐   ┌─────────┐   ┌────────┐ │
-         email ────►│ Email    │──►│ Memory  │──►│Logistics│──┼──► Council ──► OUT
-                    │  Agent   │   │  Agent  │   │ Agent   │ │
-                    └────┬────┘   └────┬────┘   └────┬────┘ │
-                         │            │             │       │
-                         └────────────┴─────────────┴───────┘
-                                       │
-                              ┌────────▼────────┐
-                              │ SQLite memory │
-                              │ sessions/audit│
-                              └────────────────┘
-
-┌─────────────────────────────────────────────────────────────────┐
-│ Vite + React 18 · TypeScript · Framer Motion · Three.js (R3F)   │
-│  SSE client · HUD · approval modal · audit table · 3D orbit     │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A[FastAPI\nPOST /process-email] --> B[LangGraph StateGraph]
+    B --> C[Email Agent\nExtract & Structure]
+    C --> D[Memory Agent\nRetrieve Context]
+    D --> E[Logistics Agent\nAnalyze Conflicts]
+    E --> F[Council Agent\nDeliberate & Decide]
+    F --> G[Final Recommendation\nHuman Approval]
+    B -.->|Shared State| H[(SQLite\nMemory Store)]
+    H -.-> D
+    
+    style A fill:#1a1a2e,stroke:#6C63FF,color:#fff
+    style B fill:#1a1a2e,stroke:#6C63FF,color:#fff
+    style C fill:#1a1a2e,stroke:#FF6B6B,color:#fff
+    style D fill:#1a1a2e,stroke:#F59E0B,color:#fff
+    style E fill:#1a1a2e,stroke:#00D4AA,color:#fff
+    style F fill:#1a1a2e,stroke:#6C63FF,color:#fff
+    style G fill:#1a1a2e,stroke:#00D4AA,color:#fff
+    style H fill:#1a1a2e,stroke:#888,color:#fff
 ```
 
 ---
