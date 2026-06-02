@@ -153,11 +153,16 @@ export function streamEmail(
 }
 
 export interface DemoPayload {
-  sample_email: string;
-  patient_profiles: Record<string, unknown>[];
+  email: string;
+  context: {
+    patient: string;
+    doctor: string;
+    caregiver: string;
+    scenario: string;
+  };
 }
 
-/** GET /api/demo — sample email + patient profiles from SQLite. */
+/** GET /api/demo — canonical assignment email + scenario context. */
 export async function getDemo(): Promise<DemoPayload> {
   const { data } = await api.get<DemoPayload>("/demo");
   return data;

@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import router
 from app.core.config import settings
-from app.memory.memory_store import init_db, seed_demo_data
+from app.memory.memory_store import init_db
 from app.middleware.request_logging import RequestLoggingMiddleware
 
 logging.basicConfig(
@@ -29,7 +29,6 @@ CareFlow AI — Multi-Agent Caregiving Intelligence — v1.0.0
 """
     )
     await init_db()
-    await seed_demo_data()
     yield
 
 

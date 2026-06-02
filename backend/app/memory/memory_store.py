@@ -60,6 +60,12 @@ async def init_db() -> None:
             """
         )
         await db.commit()
+        cur = await db.execute("SELECT COUNT(*) FROM patient_profiles")
+        row = await cur.fetchone()
+        profile_count = int(row[0]) if row and row[0] is not None else 0
+
+    if profile_count == 0:
+        await seed_demo_data()
 
 
 async def list_patient_profiles() -> list[dict[str, Any]]:
@@ -270,16 +276,36 @@ async def get_session(session_id: str) -> dict[str, Any] | None:
 
 
 async def seed_demo_data() -> None:
-    """Idempotent seed: Father / Dr. Patel profile and two completed past appointments."""
-    if await get_patient_profile("Father"):
+    # Check if already seeded
+    existing = await get_patient_profile("Father")
+    if existing:
         return
 
+    # Patrick's father — the exact patient from the assignment
     await upsert_patient_profile(
         {
             "patient_name": "Father",
             "doctor_name": "Dr. Patel",
             "preferred_transport": "Medical Transport Service",
-            "notes": "Neurology patient. Requires wheelchair assistance.",
+            "notes": (
+                "Neurology patient under Dr. Patel's care. "
+                "Requires wheelchair assistance for all appointments. "
+                "Medical Transport Service must be booked minimum 48 hours in advance. "
+                "Patrick (son) is primary caregiver and point of contact. "
+                "Patient lives at home — not a facility. "
+                "Previous appointments consistently on Tuesday mornings."
+            ),
+        }
+    )
+
+    # Two past appointments for memory context
+    await add_appointment(
+        {
+            "patient_name": "Father",
+            "doctor_name": "Dr. Patel",
+            "appointment_date": "2026-05-06",
+            "appointment_time": "10:30 AM",
+            "status": "completed",
         }
     )
 
@@ -287,17 +313,8 @@ async def seed_demo_data() -> None:
         {
             "patient_name": "Father",
             "doctor_name": "Dr. Patel",
-            "appointment_date": "2025-10-08",
-            "appointment_time": "09:30",
-            "status": "completed",
-        }
-    )
-    await add_appointment(
-        {
-            "patient_name": "Father",
-            "doctor_name": "Dr. Patel",
-            "appointment_date": "2025-11-19",
-            "appointment_time": "11:00",
+            "appointment_date": "2026-04-01",
+            "appointment_time": "10:30 AM",
             "status": "completed",
         }
     )

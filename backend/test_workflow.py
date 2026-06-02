@@ -9,13 +9,14 @@ from typing import Any
 from app.graph.workflow import run_workflow
 from app.memory.memory_store import init_db, seed_demo_data
 
-TEST_EMAIL = """
-Hi Patrick,
+TEST_EMAIL = """Hi Patrick,
+
 Your father's neurology appointment has been moved from Tuesday 10:30 AM to Wednesday 2:00 PM.
+
 Please confirm transportation arrangements.
+
 Regards,
-Dr. Patel's Office
-"""
+Dr. Patel's Office"""
 
 
 def _dump(label: str, value: Any) -> None:

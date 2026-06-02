@@ -3,14 +3,14 @@ import { useState } from "react";
 
 const MAX_STREAM = 1800;
 
-export const DEMO_EMAIL = `Subject: Reschedule — Dr. Patel neurology
+export const DEMO_EMAIL = `Hi Patrick,
 
-Hi Care Team,
+Your father's neurology appointment has been moved from Tuesday 10:30 AM to Wednesday 2:00 PM.
 
-Please move my father's neurology visit with Dr. Patel from Tuesday 10:00 AM to Friday 3:00 PM if possible. He uses wheelchair transport through MetroLift — please update the pickup window once the new slot is confirmed.
+Please confirm transportation arrangements.
 
-Thanks,
-Priya (daughter / caregiver-CEO)`;
+Regards,
+Dr. Patel's Office`;
 
 export interface EmailInputProps {
   disabled: boolean;

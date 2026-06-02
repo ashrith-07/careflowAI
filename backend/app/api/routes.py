@@ -17,26 +17,12 @@ from app.memory.memory_store import (
     create_session,
     get_audit_log,
     get_session,
-    list_patient_profiles,
     update_session_status,
 )
 
 log = logging.getLogger("careflow.api")
 
 router = APIRouter(tags=["api"])
-
-# Sample email for demos and frontend "assignment" pre-fill (Dr. Patel thread).
-SAMPLE_ASSIGNMENT_EMAIL = """
-Subject: Reschedule — Dr. Patel neurology
-
-Hi Care Team,
-
-Please move my father's neurology visit with Dr. Patel from Tuesday 10:00 AM to Friday 3:00 PM if possible. He uses wheelchair transport through MetroLift — please update the pickup window once the new slot is confirmed.
-
-Thanks,
-Priya (daughter / caregiver-CEO)
-""".strip()
-
 
 class ProcessEmailRequest(BaseModel):
     email: str = Field(..., min_length=1, description="Raw email body to process")
@@ -48,15 +34,22 @@ class SessionApproveRequest(BaseModel):
 
 
 @router.get("/demo")
-async def demo_payload() -> dict[str, Any]:
-    """
-    Static sample email plus current patient_profiles rows from SQLite
-    (seeded at startup for the Maverick demo scenario).
-    """
-    profiles = await list_patient_profiles()
+async def get_demo() -> dict[str, Any]:
     return {
-        "sample_email": SAMPLE_ASSIGNMENT_EMAIL,
-        "patient_profiles": profiles,
+        "email": (
+            "Hi Patrick,\n\n"
+            "Your father's neurology appointment has been moved "
+            "from Tuesday 10:30 AM to Wednesday 2:00 PM.\n\n"
+            "Please confirm transportation arrangements.\n\n"
+            "Regards,\n"
+            "Dr. Patel's Office"
+        ),
+        "context": {
+            "patient": "Father",
+            "doctor": "Dr. Patel",
+            "caregiver": "Patrick",
+            "scenario": "Appointment rescheduled — transport confirmation needed",
+        },
     }
 
 

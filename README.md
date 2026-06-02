@@ -110,7 +110,7 @@ python test_workflow.py
 |--------|------|-------------|
 | `GET` | `/` | Root health (`status`, `app`). |
 | `GET` | `/api/health` | API health and agent list. |
-| `GET` | `/api/demo` | Sample assignment email + patient profiles from the DB. |
+| `GET` | `/api/demo` | Canonical assignment email plus scenario `context` (patient, doctor, caregiver). |
 | `POST` | `/api/process-email` | JSON `{ "email": "..." }` — run full workflow; returns serialized workflow result. |
 | `GET` | `/api/process-email/stream` | Query `email=` — SSE stream (`agent_started`, `agent_completed`, `workflow_completed`, `workflow_failed`, `error`). |
 | `POST` | `/api/sessions/{session_id}/approve` | JSON `{ "action": "approve"|"reject"|"review", "notes": "" }`. |
